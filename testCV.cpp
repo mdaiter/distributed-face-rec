@@ -1,11 +1,8 @@
 #include<stdio.h>
-<<<<<<< HEAD
 #include<sstream>
 #include<fstream>
 #include<iostream>
 #include<tuple>
-=======
->>>>>>> 9108755a8713f59559ecee239372909223f1e047
 #include<opencv2/objdetect/objdetect.hpp>
 #include<opencv2/highgui/highgui.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
@@ -24,7 +21,6 @@ testCV::testCV(){
     bodyDetector = new ocl::OclCascadeClassifier();
     faceDetector->load("/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml");
     bodyDetector->load("/usr/share/opencv/haarcascades/haarcascade_mcs_upperbody.xml");
-<<<<<<< HEAD
     images = new std::vector<cv::Mat>();
     labels = new std::vector<int>();
     faceRecognizer = createLBPHFaceRecognizer();
@@ -34,15 +30,12 @@ testCV::testCV(){
     labels->push_back(2);
     faceRecognizer->train(*images, *labels);
 
-=======
->>>>>>> 9108755a8713f59559ecee239372909223f1e047
 }
 
 testCV::~testCV(){
 
 }
 
-<<<<<<< HEAD
 int testCV::recognizeFaces(cv::Mat& orig, cv::Mat &gray, cv::Rect rect){
     try{
         Mat roi(gray, rect);
@@ -91,16 +84,12 @@ void broadcastJsonFromData(int port, vector<tuple<Rect, int>> faces){
 }
 
 vector<tuple<Rect, int>> testCV::detectFaces(Mat& frame){
-=======
-vector<Rect> testCV::detectFaces(Mat& frame){
->>>>>>> 9108755a8713f59559ecee239372909223f1e047
     Mat frameGray, dst;
     cvtColor(frame, frameGray, CV_BGR2GRAY);
     ocl::oclMat src(frameGray);
     equalizeHist (frameGray, frameGray);
     vector<Rect> objbuf;
     faceDetector->detectMultiScale(src, objbuf, 1.2, 3, 0|CV_HAAR_SCALE_IMAGE, Size(20,20), Size(0,0));
-<<<<<<< HEAD
 
     vector<std::tuple<Rect, int>> personVec;
     for (size_t i = 0; i < objbuf.size(); i++){
@@ -109,12 +98,6 @@ vector<Rect> testCV::detectFaces(Mat& frame){
         personVec.push_back(person);
     }
     return personVec;
-=======
-    for (size_t i = 0; i < objbuf.size(); i++){
-        rectangle(frame, objbuf[i], Scalar(255));
-    }
-    return objbuf;
->>>>>>> 9108755a8713f59559ecee239372909223f1e047
 }
 
 bool inside(Rect x, Rect y){
@@ -156,16 +139,10 @@ int main(){
         while(true){
             Mat frame, frameGray;
             capture >> frame;
-<<<<<<< HEAD
             vector<tuple<Rect, int>> faces = cv->detectFaces(frame);
             //run position code
             broadcastJsonFromData(8008, faces);
             //update data in server
-
-=======
-            vector<Rect> people = cv->detectPeople(frame);
-            vector<Rect> faces = cv->detectFaces(frame);
->>>>>>> 9108755a8713f59559ecee239372909223f1e047
             imshow("result", frame);
             waitKey(2);
         }
