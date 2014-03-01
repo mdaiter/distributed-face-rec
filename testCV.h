@@ -7,6 +7,7 @@
 #include<opencv2/imgproc/imgproc.hpp>
 class testCV{
     public:
+        void broadcastJsonFromData(int, std::vector<std::tuple<cv::Rect, int>>);
         std::vector<cv::Rect> detectPeople(cv::Mat&);
         std::vector<std::tuple<cv::Rect, int>> detectFaces(cv::Mat&);
         testCV();
@@ -18,7 +19,7 @@ class testCV{
         std::vector<int> *labels;
         std::vector<cv::Mat> *images;
         cv::Ptr<cv::FaceRecognizer> faceRecognizer;
-
+        std::map<int, std::string> *intToFace;
         int recognizeFaces(cv::Mat&, cv::Mat&, cv::Rect);
 };
 #endif

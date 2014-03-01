@@ -19,6 +19,7 @@ testCV::testCV(){
     hog.setSVMDetector(gpu::HOGDescriptor::getDefaultPeopleDetector());
     faceDetector = new gpu::CascadeClassifier_GPU();
     bodyDetector = new gpu::CascadeClassifier_GPU();
+    intToFace = new map<int, string>();
     faceDetector->load("/usr/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml");
     bodyDetector->load("/usr/share/OpenCV/haarcascades/haarcascade_mcs_upperbody.xml");
     images = new std::vector<cv::Mat>();
@@ -28,6 +29,8 @@ testCV::testCV(){
     images->push_back(imread("./sang.jpg", 0));
     labels->push_back(1);
     labels->push_back(2);
+    intToFace->insert(pair<int, string>(1, "Matt"));
+    intToFace->insert(pair<int, string>(2, "Dan"));
     faceRecognizer->train(*images, *labels);
 
 }
@@ -59,7 +62,7 @@ int testCV::recognizeFaces(cv::Mat& orig, cv::Mat &gray, cv::Rect rect){
     }
 }
 
-void broadcastJsonFromData(int port, vector<tuple<Rect, int>> faces){
+void testCV::broadcastJsonFromData(int port, vector<tuple<Rect, int>> faces){
     json::Object dataBroadcastRoot;
     dataBroadcastRoot["name"] = "Kinect";
     dataBroadcastRoot["type"] = "camera";
@@ -71,7 +74,7 @@ void broadcastJsonFromData(int port, vector<tuple<Rect, int>> faces){
 
         personObject["positionX"] =  get<0>(faces[i]).x;
         personObject["positionY"] = get<0>(faces[i]).y;
-        personObject["name"] = get<1>(faces[i]);
+        personObject["name"] = intToFace->find(get<1>(faces[i]))->second;
 
         arrayFaces.push_back(personObject);
     }
@@ -143,7 +146,7 @@ int main(){
             capture >> frame;
             vector<tuple<Rect, int>> faces = cv->detectFaces(frame);
             //run position code
-            broadcastJsonFromData(8008, faces);
+            cv->broadcastJsonFromData(8008, faces);
             //update data in server
             imshow("result", frame);
             waitKey(2);
