@@ -2,9 +2,8 @@
 #define TESTCV_H
 #include<opencv2/core/core.hpp>
 #include<opencv2/contrib/contrib.hpp>
-#include<opencv2/ocl/ocl.hpp>
 #include<tuple>
-#include<opencv2/ocl/ocl.hpp>
+#include<opencv2/gpu/gpu.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
 class testCV{
     public:
@@ -13,9 +12,9 @@ class testCV{
         testCV();
         ~testCV();
     private:
-        cv::ocl::OclCascadeClassifier *faceDetector;
-        cv::ocl::OclCascadeClassifier *bodyDetector;
-        cv::ocl::HOGDescriptor hog;
+        cv::gpu::CascadeClassifier_GPU *faceDetector;
+        cv::gpu::CascadeClassifier_GPU *bodyDetector;
+        cv::gpu::HOGDescriptor hog;
         std::vector<int> *labels;
         std::vector<cv::Mat> *images;
         cv::Ptr<cv::FaceRecognizer> faceRecognizer;

@@ -16,11 +16,11 @@ using namespace cv;
 using namespace std;
 
 testCV::testCV(){
-    hog.setSVMDetector(ocl::HOGDescriptor::getDefaultPeopleDetector());
-    faceDetector = new ocl::OclCascadeClassifier();
-    bodyDetector = new ocl::OclCascadeClassifier();
-    faceDetector->load("/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml");
-    bodyDetector->load("/usr/share/opencv/haarcascades/haarcascade_mcs_upperbody.xml");
+    hog.setSVMDetector(gpu::HOGDescriptor::getDefaultPeopleDetector());
+    faceDetector = new gpu::CascadeClassifier_GPU();
+    bodyDetector = new gpu::CascadeClassifier_GPU();
+    faceDetector->load("/usr/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml");
+    bodyDetector->load("/usr/share/OpenCV/haarcascades/haarcascade_mcs_upperbody.xml");
     images = new std::vector<cv::Mat>();
     labels = new std::vector<int>();
     faceRecognizer = createLBPHFaceRecognizer();
@@ -86,15 +86,17 @@ void broadcastJsonFromData(int port, vector<tuple<Rect, int>> faces){
 vector<tuple<Rect, int>> testCV::detectFaces(Mat& frame){
     Mat frameGray, dst;
     cvtColor(frame, frameGray, CV_BGR2GRAY);
-    ocl::oclMat src(frameGray);
+    gpu::GpuMat src(frameGray);
     equalizeHist (frameGray, frameGray);
-    vector<Rect> objbuf;
-    faceDetector->detectMultiScale(src, objbuf, 1.2, 3, 0|CV_HAAR_SCALE_IMAGE, Size(20,20), Size(0,0));
-
+    gpu::GpuMat objbuf;
+    int detections_number = faceDetector->detectMultiScale(src, objbuf, 1.2, 4, Size(20,20));
+    Mat obj_host;
+    objbuf.colRange(0, detections_number).download(obj_host);
+    Rect* faces = obj_host.ptr<Rect>();
     vector<std::tuple<Rect, int>> personVec;
-    for (size_t i = 0; i < objbuf.size(); i++){
-        rectangle(frame, objbuf[i], Scalar(255));
-        std::tuple<Rect, int> person (objbuf[i], recognizeFaces(frame, frameGray, objbuf[i]));
+    for (size_t i = 0; i < detections_number; i++){
+        rectangle(frame, faces[i], Scalar(255));
+        std::tuple<Rect, int> person (faces[i], recognizeFaces(frame, frameGray, faces[i]));
         personVec.push_back(person);
     }
     return personVec;
@@ -107,11 +109,11 @@ bool inside(Rect x, Rect y){
 }
 
 std::vector<Rect> testCV::detectPeople(Mat& frame){
-    ocl::HOGDescriptor hog;
-    hog.setSVMDetector(ocl::HOGDescriptor::getDefaultPeopleDetector());
+    gpu::HOGDescriptor hog;
+    hog.setSVMDetector(gpu::HOGDescriptor::getDefaultPeopleDetector());
     Mat frameGray;
     cvtColor(frame, frameGray, CV_BGR2BGRA);
-    ocl::oclMat src(frameGray);
+    gpu::GpuMat src(frameGray);
 
     std::vector<Rect> found;
     std::vector<Rect> foundFiltered;
